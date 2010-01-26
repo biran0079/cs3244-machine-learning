@@ -1,6 +1,7 @@
 package id3;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +13,18 @@ public class DataSet implements Iterable<Instance> {
 	private ArrayList<LinkedList<Instance>> lbs;
 	private int featureNum, labelNum;
 	private int totalSize;
+
+	public static DataSet merge(DataSet[] ds) {
+		DataSet res = new DataSet(ds[0].featureNum, ds[0].labelNum);
+		for (int i = 0; i < ds.length; i++) {
+			for (int j = 0; j < ds[0].labelNum; j++) {
+				for(Instance x:ds[i].lbs.get(j)){
+					res.add(x);
+				}
+			}
+		}
+		return res;
+	}
 
 	public int getFeatureNum() {
 		return featureNum;
@@ -68,7 +81,7 @@ public class DataSet implements Iterable<Instance> {
 	 *         second DataSet contains data to keep
 	 * 
 	 * */
-	public DataSetPair split(Filter x) {
+	public DataSet[] split(Filter x) {
 		DataSet a = new DataSet(this.featureNum, labelNum), b = new DataSet(
 				this.featureNum, labelNum);
 		for (LinkedList<Instance> l : lbs)
@@ -79,7 +92,27 @@ public class DataSet implements Iterable<Instance> {
 					b.add(tem);
 				}
 			}
-		return new DataSetPair(a, b);
+		DataSet[] res = new DataSet[2];
+		res[0] = a;
+		res[1] = b;
+		return res;
+	}
+
+	public DataSet[] split(int n) {
+		ArrayList<Instance> lst = new ArrayList<Instance>();
+		for (Instance i : this) {
+			lst.add(i);
+		}
+		Collections.shuffle(lst);
+		DataSet[] res = new DataSet[n];
+		for (int i = 0; i < n; i++)
+			res[i] = new DataSet(this.featureNum, this.labelNum);
+		int idx = 0;
+		for (Instance i : lst) {
+			res[idx].add(i);
+			idx = (idx + 1) % n;
+		}
+		return res;
 	}
 
 	private double log2(double x) {
