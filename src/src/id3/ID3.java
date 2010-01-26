@@ -24,9 +24,12 @@ public class ID3 {
 
 	ID3(DataSet s) {
 		this.trainingData = s;
-		this.root = buildTree(s);
+		this.root = buildTree(trainingData);
 	}
-
+	ID3(DataSet[] ds) {
+		this.trainingData = DataSet.merge(ds);
+		this.root = buildTree(trainingData);
+	}
 	private ID3Node buildTree(DataSet s) {
 		if (s.isEmpty() || s.allSameLabel())
 			return new ID3Leaf(s.getMostFrequentLabel());
@@ -43,10 +46,10 @@ public class ID3 {
 		}
 		ID3Node res = new ID3Node();
 		res.featureIdx = maxIdx;
-		DataSetPair p = s.split(new KeepTrueFilter(maxIdx));
+		DataSet[] p = s.split(new KeepTrueFilter(maxIdx));
 		//System.out.println(p.first.size()+" "+p.second.size());
-		res.children[0] = buildTree(p.first);
-		res.children[1] = buildTree(p.second);
+		res.children[0] = buildTree(p[0]);
+		res.children[1] = buildTree(p[1]);
 		return res;
 	}
 
