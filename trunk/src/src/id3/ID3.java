@@ -13,9 +13,9 @@ public class ID3 {
 	}
 
 	class ID3Leaf extends ID3Node {
-		boolean label;
+		int label;
 
-		ID3Leaf(boolean l) {
+		ID3Leaf(int l) {
 			this.label = l;
 		}
 	}
@@ -44,13 +44,13 @@ public class ID3 {
 		ID3Node res = new ID3Node();
 		res.featureIdx = maxIdx;
 		DataSetPair p = s.split(new KeepTrueFilter(maxIdx));
-
+		//System.out.println(p.first.size()+" "+p.second.size());
 		res.children[0] = buildTree(p.first);
 		res.children[1] = buildTree(p.second);
 		return res;
 	}
 
-	public boolean classify(Instance x) {
+	public int classify(Instance x) {
 		ID3Node cur = root;
 		while (!(cur instanceof ID3Leaf)) {
 			if (x.getFeature(cur.featureIdx)) {
@@ -64,14 +64,8 @@ public class ID3 {
 
 	public double test(DataSet s) {
 		int right = 0, wrong = 0;
-		for (Instance x : s.getFalseList()) {
-			if (!classify(x))
-				right++;
-			else
-				wrong++;
-		}
-		for (Instance x : s.getTrueList()) {
-			if (classify(x))
+		for (Instance x:s) {
+			if (classify(x)==x.getLabel())
 				right++;
 			else
 				wrong++;

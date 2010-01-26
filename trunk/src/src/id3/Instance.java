@@ -5,14 +5,14 @@ import java.util.Arrays;
 
 public class Instance {
 	private boolean[] features;
-	private boolean label;
+	private int label;
 
-	public Instance(boolean[] f, boolean l) {
+	public Instance(boolean[] f, int l) {
 		this.features = Arrays.copyOf(f, f.length);
 		this.label = l;
 	}
 
-	public boolean getLabel() {
+	public int getLabel() {
 		return label;
 	}
 

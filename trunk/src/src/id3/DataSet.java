@@ -7,28 +7,31 @@ import java.util.List;
 
 import filter.Filter;
 
-public class DataSet {
-	private LinkedList<Instance> t, f;
-	private int featureNum;
+public class DataSet implements Iterable<Instance> {
+	@SuppressWarnings("unchecked")
+	private ArrayList<LinkedList<Instance>> lbs;
+	private int featureNum, labelNum;
+	private int totalSize;
 
 	public int getFeatureNum() {
 		return featureNum;
 	}
 
-	public List<Instance> getTrueList() {
-		return t;
+	@SuppressWarnings("unchecked")
+	public List<Instance> getListLabeled(int i) {
+		return lbs.get(i);
 	}
 
-	public List<Instance> getFalseList() {
-		return f;
-	}
-
-	public DataSet(int featureNum) {
+	public DataSet(int featureNum, int labelNum) {
 		this.featureNum = featureNum;
-		t = new LinkedList<Instance>();
-		f = new LinkedList<Instance>();
+		this.labelNum = labelNum;
+		lbs = new ArrayList<LinkedList<Instance>>();
+		for (int i = 0; i < labelNum; i++)
+			lbs.add(new LinkedList<Instance>());
+		totalSize = 0;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void add(Instance x) {
 		if (x.getFeatureNum() != this.featureNum) {
 			try {
@@ -37,22 +40,25 @@ public class DataSet {
 				e.printStackTrace();
 			}
 		}
-		if (x.getLabel())
-			t.add(x);
-		else
-			f.add(x);
+		lbs.get(x.getLabel()).add(x);
+		totalSize++;
 	}
 
 	public int size() {
-		return t.size() + f.size();
+		return totalSize;
 	}
 
 	public boolean isEmpty() {
-		return t.isEmpty() && f.isEmpty();
+		return totalSize == 0;
 	}
 
 	public boolean allSameLabel() {
-		return t.isEmpty() || f.isEmpty();
+		int ct = 0;
+		for (int i = 0; i < labelNum; i++) {
+			if (lbs.get(i).size() != 0)
+				ct++;
+		}
+		return ct == 1;
 	}
 
 	/**
@@ -63,22 +69,16 @@ public class DataSet {
 	 * 
 	 * */
 	public DataSetPair split(Filter x) {
-		DataSet a = new DataSet(this.featureNum), b = new DataSet(
-				this.featureNum);
-		for (Instance tem : t) {
-			if (!x.keep(tem)) {
-				a.add(tem);
-			} else {
-				b.add(tem);
+		DataSet a = new DataSet(this.featureNum, labelNum), b = new DataSet(
+				this.featureNum, labelNum);
+		for (LinkedList<Instance> l : lbs)
+			for (Instance tem : l) {
+				if (!x.keep(tem)) {
+					a.add(tem);
+				} else {
+					b.add(tem);
+				}
 			}
-		}
-		for (Instance tem : f) {
-			if (!x.keep(tem)) {
-				a.add(tem);
-			} else {
-				b.add(tem);
-			}
-		}
 		return new DataSetPair(a, b);
 	}
 
@@ -89,39 +89,99 @@ public class DataSet {
 	}
 
 	public double getEntropy() {
-		double p1 = (double) t.size() / this.size(), p2 = 1.0 - p1;
-		return -p1 * log2(p1) - p2 * log2(p2);
-	}
-
-	public double getEntropyOnFeature(int i) {
-		int tn1 = 0, fn1 = 0, tn0 = 0, fn0 = 0;
-		double res = 0;
-		for (Instance x : t)
-			if (x.getFeature(i))
-				tn1++;
-			else
-				tn0++;
-		for (Instance x : f)
-			if (x.getFeature(i))
-				fn1++;
-			else
-				fn0++;
-		double portion1 = (double) (tn0 + fn0) / this.size(), portion2 = 1 - portion1;
-		if (tn0 + fn0 != 0) {
-			double p1 = (double) tn0 / (tn0 + fn0), p2 = 1 - p1;
-			double e1 = -p1 * log2(p1) - p2 * log2(p2);
-			res += portion1 * e1;
-		}
-		if (tn1 + fn1 != 0) {
-			double p1 = (double) tn1 / (tn1 + fn1);
-			double p2 = 1 - p1;
-			double e2 = -p1 * log2(p1) - p2 * log2(p2);
-			res+=portion2 * e2;
+		double res = 0, p;
+		for (LinkedList<Instance> l : lbs) {
+			p = (double) l.size() / totalSize;
+			res += -p * log2(p);
 		}
 		return res;
 	}
 
-	public boolean getMostFrequentLabel() {
-		return f.size() > t.size() ? false : true;
+	public double getEntropyOnFeature(int idx) {
+		int[][] ct = new int[2][labelNum];
+		int S0 = 0, S1 = 0, S;
+		for (int i = 0; i < labelNum; i++) {
+			for (Instance j : lbs.get(i)) {
+				if (j.getFeature(idx)) {
+					ct[1][i]++;
+					S1++;
+				} else {
+					ct[0][i]++;
+					S0++;
+				}
+			}
+		}
+		S = S0 + S1;
+		double e0 = 0, e1 = 0, p;
+		for (int i = 0; i < labelNum; i++) {
+			if (S0 == 0) {
+				p = 0;
+			} else {
+				p = (double) ct[0][i] / S0;
+			}
+			e0 += -p * log2(p);
+			if (S1 == 0) {
+				p = 0;
+			} else {
+				p = (double) ct[1][i] / S1;
+			}
+			e1 += -p * log2(p);
+		}
+		double res = 0;
+		res += (double) S0 / totalSize * e0 + (double) S1 / totalSize * e1;
+		return res;
+	}
+
+	public int getMostFrequentLabel() {
+		int res = 0, maxSize = lbs.get(0).size();
+		for (int i = 1; i < labelNum; i++)
+			if (lbs.get(i).size() > maxSize) {
+				maxSize = lbs.get(i).size();
+				res = i;
+			}
+		return res;
+	}
+
+	class DatasetIterator implements Iterator<Instance> {
+
+		Iterator<LinkedList<Instance>> i;
+		Iterator<Instance> j;
+
+		DatasetIterator() {
+			i = lbs.iterator();
+			if (i.hasNext()) {
+				j = i.next().iterator();
+			} else {
+				try {
+					throw new Exception("Label number not correct");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+
+		@Override
+		public boolean hasNext() {
+			while (!j.hasNext() && i.hasNext())
+				j = i.next().iterator();
+			return j.hasNext();
+		}
+
+		@Override
+		public Instance next() {
+			return j.next();
+		}
+
+		@Override
+		public void remove() {
+			j.remove();
+		}
+
+	}
+
+	@Override
+	public Iterator<Instance> iterator() {
+		return new DatasetIterator();
 	}
 }

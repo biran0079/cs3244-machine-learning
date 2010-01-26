@@ -22,10 +22,10 @@ public class BooleanFunctionBuilder {
 	}
 
 	private Node root;
-	private int top,varNum;
-	
+	private int top, varNum;
+
 	public BooleanFunctionBuilder(int varNum) {
-		this.varNum=varNum;
+		this.varNum = varNum;
 		root = BuildRandom(varNum);
 		top = 0;
 		allocateIdx(root);
@@ -78,29 +78,29 @@ public class BooleanFunctionBuilder {
 				return eval(cur.children[0], l) && eval(cur.children[1], l);
 			}
 		}
-		//System.out.println('!');
+		// System.out.println('!');
 		return true; // never reached
 	}
 
-	boolean eval(boolean[] l) {
-		return eval(root, l);
+	int eval(boolean[] l) {
+		return eval(root, l) ? 1 : 0;
 	}
 
 	private void printExp(Node cur) {
 		if (cur instanceof Leaf) {
-			System.out.print((char)('A'+((Leaf) cur).idx));
+			System.out.print((char) ('A' + ((Leaf) cur).idx));
 		} else {
-			if(cur.op==Operator.NOT){
+			if (cur.op == Operator.NOT) {
 				System.out.print("!(");
 				printExp(cur.children[0]);
 				System.out.print(")");
-			}else{
+			} else {
 				System.out.print("(");
 				printExp(cur.children[0]);
 				System.out.print(")");
-				
-				System.out.print(cur.op==Operator.AND?" && ":" || ");
-				
+
+				System.out.print(cur.op == Operator.AND ? " && " : " || ");
+
 				System.out.print("(");
 				printExp(cur.children[1]);
 				System.out.print(")");
@@ -111,36 +111,38 @@ public class BooleanFunctionBuilder {
 	public void printExp() {
 		printExp(root);
 	}
-	public DataSet getDatSet(int num){
-		if(varNum>30 || (1<<varNum)>num){
+
+	public DataSet getDatSet(int num) {
+		if (varNum > 30 || (1 << varNum) > num) {
 			return randomDataSet(num);
-		}else{
+		} else {
 			return completeDataSet();
 		}
 	}
+
 	private DataSet randomDataSet(int num) {
-		boolean[] l=new boolean[varNum];
-		DataSet res=new DataSet(varNum);
-		for(int i=0;i<num;i++){
-			for(int j=0;j<varNum;j++)
-				l[j]=r.nextBoolean();
-			res.add(new Instance(l,eval(l)));
+		boolean[] l = new boolean[varNum];
+		DataSet res = new DataSet(varNum, 2);
+		for (int i = 0; i < num; i++) {
+			for (int j = 0; j < varNum; j++)
+				l[j] = r.nextBoolean();
+			res.add(new Instance(l, eval(l)));
 		}
 		return res;
 	}
 
 	private DataSet completeDataSet() {
-		boolean[] l=new boolean[varNum];
-		DataSet res=new DataSet(varNum);
-		for(int i=0;i<(1<<varNum);i++){
-			for(int j=0;j<varNum;j++){
-				if((i & (1<<j))!=0){
-					l[j]=true;
-				}else{
-					l[j]=false;
+		boolean[] l = new boolean[varNum];
+		DataSet res = new DataSet(varNum, 2);
+		for (int i = 0; i < (1 << varNum); i++) {
+			for (int j = 0; j < varNum; j++) {
+				if ((i & (1 << j)) != 0) {
+					l[j] = true;
+				} else {
+					l[j] = false;
 				}
 			}
-			res.add(new Instance(l,eval(l)));
+			res.add(new Instance(l, eval(l)));
 		}
 		return res;
 	}
@@ -148,6 +150,6 @@ public class BooleanFunctionBuilder {
 	public static void main(String[] args) {
 		BooleanFunctionBuilder tree = new BooleanFunctionBuilder(3);
 		boolean[] l = new boolean[3];
-		
+
 	}
 }
