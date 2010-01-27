@@ -73,8 +73,8 @@ public class ID3Testing {
 		return res/foldNum;
 	}
 	public static void main(String[] args) throws IOException {
-		//DataSet d = FileTesting("Semeion",256,10);
-		DataSet d=RandomBooleanFunctionTesting(30,20000);
+		DataSet d = FileTesting("Semeion",256,10);
+		//DataSet d=RandomBooleanFunctionTesting(30,20000);
 		System.out.println(splitValidation(d,0.66));
 		System.out.println(crossValidation(d,2));
 	}
