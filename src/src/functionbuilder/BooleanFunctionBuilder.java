@@ -1,7 +1,7 @@
 package functionbuilder;
 
-import id3.DataSet;
-import id3.Instance;
+import id3.ID3DataSet;
+import id3.ID3Instance;
 
 import java.util.Random;
 
@@ -112,7 +112,7 @@ public class BooleanFunctionBuilder {
 		printExp(root);
 	}
 
-	public DataSet getDatSet(int num) {
+	public ID3DataSet getDatSet(int num) {
 		if (varNum > 30 || (1 << varNum) > num) {
 			return randomDataSet(num);
 		} else {
@@ -120,20 +120,20 @@ public class BooleanFunctionBuilder {
 		}
 	}
 
-	private DataSet randomDataSet(int num) {
+	private ID3DataSet randomDataSet(int num) {
 		boolean[] l = new boolean[varNum];
-		DataSet res = new DataSet(varNum, 2);
+		ID3DataSet res = new ID3DataSet(varNum, 2);
 		for (int i = 0; i < num; i++) {
 			for (int j = 0; j < varNum; j++)
 				l[j] = r.nextBoolean();
-			res.add(new Instance(l, eval(l)));
+			res.add(new ID3Instance(l, eval(l)));
 		}
 		return res;
 	}
 
-	private DataSet completeDataSet() {
+	private ID3DataSet completeDataSet() {
 		boolean[] l = new boolean[varNum];
-		DataSet res = new DataSet(varNum, 2);
+		ID3DataSet res = new ID3DataSet(varNum, 2);
 		for (int i = 0; i < (1 << varNum); i++) {
 			for (int j = 0; j < varNum; j++) {
 				if ((i & (1 << j)) != 0) {
@@ -142,7 +142,7 @@ public class BooleanFunctionBuilder {
 					l[j] = false;
 				}
 			}
-			res.add(new Instance(l, eval(l)));
+			res.add(new ID3Instance(l, eval(l)));
 		}
 		return res;
 	}

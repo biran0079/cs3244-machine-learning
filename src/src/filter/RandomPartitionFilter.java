@@ -2,7 +2,7 @@ package filter;
 
 import java.util.Random;
 
-import id3.Instance;
+import id3.ID3Instance;
 
 
 public class RandomPartitionFilter implements Filter {
@@ -14,7 +14,7 @@ public class RandomPartitionFilter implements Filter {
 	}
 
 	@Override
-	public boolean keep(Instance x) {
+	public boolean keep(ID3Instance x) {
 		return r.nextDouble()>d;
 	}
 

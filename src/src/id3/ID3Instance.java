@@ -3,11 +3,11 @@ package id3;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Instance {
+public class ID3Instance {
 	private boolean[] features;
 	private int label;
 
-	public Instance(boolean[] f, int l) {
+	public ID3Instance(boolean[] f, int l) {
 		this.features = Arrays.copyOf(f, f.length);
 		this.label = l;
 	}
@@ -28,8 +28,8 @@ public class Instance {
 	}
 	@Override
 	public boolean equals(Object o){
-		if(!(o instanceof Instance))return false;
-		Instance t=(Instance)o;
+		if(!(o instanceof ID3Instance))return false;
+		ID3Instance t=(ID3Instance)o;
 		for(int i=0;i<features.length;i++)
 			if(t.getFeature(i)!=features[i])
 				return false;
