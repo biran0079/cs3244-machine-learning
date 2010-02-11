@@ -1,7 +1,7 @@
 package filter;
 
-import id3.Instance;
+import id3.ID3Instance;
 
 public interface Filter {
-	public boolean keep(Instance x);
+	public boolean keep(ID3Instance x);
 }

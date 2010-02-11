@@ -8,17 +8,17 @@ import java.util.List;
 
 import filter.Filter;
 
-public class DataSet implements Iterable<Instance> {
+public class ID3DataSet implements Iterable<ID3Instance> {
 	@SuppressWarnings("unchecked")
-	private ArrayList<LinkedList<Instance>> lbs;
+	private ArrayList<LinkedList<ID3Instance>> lbs;
 	private int featureNum, labelNum;
 	private int totalSize;
 
-	public static DataSet merge(DataSet[] ds) {
-		DataSet res = new DataSet(ds[0].featureNum, ds[0].labelNum);
+	public static ID3DataSet merge(ID3DataSet[] ds) {
+		ID3DataSet res = new ID3DataSet(ds[0].featureNum, ds[0].labelNum);
 		for (int i = 0; i < ds.length; i++) {
 			for (int j = 0; j < ds[0].labelNum; j++) {
-				for(Instance x:ds[i].lbs.get(j)){
+				for(ID3Instance x:ds[i].lbs.get(j)){
 					res.add(x);
 				}
 			}
@@ -31,21 +31,21 @@ public class DataSet implements Iterable<Instance> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Instance> getListLabeled(int i) {
+	public List<ID3Instance> getListLabeled(int i) {
 		return lbs.get(i);
 	}
 
-	public DataSet(int featureNum, int labelNum) {
+	public ID3DataSet(int featureNum, int labelNum) {
 		this.featureNum = featureNum;
 		this.labelNum = labelNum;
-		lbs = new ArrayList<LinkedList<Instance>>();
+		lbs = new ArrayList<LinkedList<ID3Instance>>();
 		for (int i = 0; i < labelNum; i++)
-			lbs.add(new LinkedList<Instance>());
+			lbs.add(new LinkedList<ID3Instance>());
 		totalSize = 0;
 	}
 
 	@SuppressWarnings("unchecked")
-	public void add(Instance x) {
+	public void add(ID3Instance x) {
 		if (x.getFeatureNum() != this.featureNum) {
 			try {
 				throw new Exception("Feature Number does not match");
@@ -81,34 +81,34 @@ public class DataSet implements Iterable<Instance> {
 	 *         second DataSet contains data to keep
 	 * 
 	 * */
-	public DataSet[] split(Filter x) {
-		DataSet a = new DataSet(this.featureNum, labelNum), b = new DataSet(
+	public ID3DataSet[] split(Filter x) {
+		ID3DataSet a = new ID3DataSet(this.featureNum, labelNum), b = new ID3DataSet(
 				this.featureNum, labelNum);
-		for (LinkedList<Instance> l : lbs)
-			for (Instance tem : l) {
+		for (LinkedList<ID3Instance> l : lbs)
+			for (ID3Instance tem : l) {
 				if (!x.keep(tem)) {
 					a.add(tem);
 				} else {
 					b.add(tem);
 				}
 			}
-		DataSet[] res = new DataSet[2];
+		ID3DataSet[] res = new ID3DataSet[2];
 		res[0] = a;
 		res[1] = b;
 		return res;
 	}
 
-	public DataSet[] split(int n) {
-		ArrayList<Instance> lst = new ArrayList<Instance>();
-		for (Instance i : this) {
+	public ID3DataSet[] split(int n) {
+		ArrayList<ID3Instance> lst = new ArrayList<ID3Instance>();
+		for (ID3Instance i : this) {
 			lst.add(i);
 		}
 		Collections.shuffle(lst);
-		DataSet[] res = new DataSet[n];
+		ID3DataSet[] res = new ID3DataSet[n];
 		for (int i = 0; i < n; i++)
-			res[i] = new DataSet(this.featureNum, this.labelNum);
+			res[i] = new ID3DataSet(this.featureNum, this.labelNum);
 		int idx = 0;
-		for (Instance i : lst) {
+		for (ID3Instance i : lst) {
 			res[idx].add(i);
 			idx = (idx + 1) % n;
 		}
@@ -123,7 +123,7 @@ public class DataSet implements Iterable<Instance> {
 
 	public double getEntropy() {
 		double res = 0, p;
-		for (LinkedList<Instance> l : lbs) {
+		for (LinkedList<ID3Instance> l : lbs) {
 			p = (double) l.size() / totalSize;
 			res += -p * log2(p);
 		}
@@ -134,7 +134,7 @@ public class DataSet implements Iterable<Instance> {
 		int[][] ct = new int[2][labelNum];
 		int S0 = 0, S1 = 0, S;
 		for (int i = 0; i < labelNum; i++) {
-			for (Instance j : lbs.get(i)) {
+			for (ID3Instance j : lbs.get(i)) {
 				if (j.getFeature(idx)) {
 					ct[1][i]++;
 					S1++;
@@ -175,10 +175,10 @@ public class DataSet implements Iterable<Instance> {
 		return res;
 	}
 
-	class DatasetIterator implements Iterator<Instance> {
+	class DatasetIterator implements Iterator<ID3Instance> {
 
-		Iterator<LinkedList<Instance>> i;
-		Iterator<Instance> j;
+		Iterator<LinkedList<ID3Instance>> i;
+		Iterator<ID3Instance> j;
 
 		DatasetIterator() {
 			i = lbs.iterator();
@@ -202,7 +202,7 @@ public class DataSet implements Iterable<Instance> {
 		}
 
 		@Override
-		public Instance next() {
+		public ID3Instance next() {
 			return j.next();
 		}
 
@@ -214,7 +214,7 @@ public class DataSet implements Iterable<Instance> {
 	}
 
 	@Override
-	public Iterator<Instance> iterator() {
+	public Iterator<ID3Instance> iterator() {
 		return new DatasetIterator();
 	}
 }

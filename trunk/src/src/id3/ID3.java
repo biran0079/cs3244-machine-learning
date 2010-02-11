@@ -5,7 +5,7 @@ import filter.RandomPartitionFilter;
 import functionbuilder.BooleanFunctionBuilder;
 
 public class ID3 {
-	private DataSet trainingData;
+	private ID3DataSet trainingData;
 
 	class ID3Node {
 		int featureIdx;
@@ -22,15 +22,15 @@ public class ID3 {
 
 	private ID3Node root;
 
-	ID3(DataSet s) {
+	ID3(ID3DataSet s) {
 		this.trainingData = s;
 		this.root = buildTree(trainingData);
 	}
-	ID3(DataSet[] ds) {
-		this.trainingData = DataSet.merge(ds);
+	ID3(ID3DataSet[] ds) {
+		this.trainingData = ID3DataSet.merge(ds);
 		this.root = buildTree(trainingData);
 	}
-	private ID3Node buildTree(DataSet s) {
+	private ID3Node buildTree(ID3DataSet s) {
 		if (s.isEmpty() || s.allSameLabel())
 			return new ID3Leaf(s.getMostFrequentLabel());
 
@@ -46,14 +46,14 @@ public class ID3 {
 		}
 		ID3Node res = new ID3Node();
 		res.featureIdx = maxIdx;
-		DataSet[] p = s.split(new KeepTrueFilter(maxIdx));
+		ID3DataSet[] p = s.split(new KeepTrueFilter(maxIdx));
 		//System.out.println(p.first.size()+" "+p.second.size());
 		res.children[0] = buildTree(p[0]);
 		res.children[1] = buildTree(p[1]);
 		return res;
 	}
 
-	public int classify(Instance x) {
+	public int classify(ID3Instance x) {
 		ID3Node cur = root;
 		while (!(cur instanceof ID3Leaf)) {
 			if (x.getFeature(cur.featureIdx)) {
@@ -65,9 +65,9 @@ public class ID3 {
 		return ((ID3Leaf) cur).label;
 	}
 
-	public double test(DataSet s) {
+	public double test(ID3DataSet s) {
 		int right = 0, wrong = 0;
-		for (Instance x:s) {
+		for (ID3Instance x:s) {
 			if (classify(x)==x.getLabel())
 				right++;
 			else
